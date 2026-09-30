@@ -17,19 +17,21 @@ from .system import (
     sleep_modes,
     ssh_enabled,
 )
-from .tweaks import fex_profile_labels, load_fex_contract, load_tweaks
+from .tweaks import fex_profile_labels, load_env_presets, load_fex_contract, load_tweaks
 
 
 def build_config(include_games=True):
     fex_contract = load_fex_contract()
     env = device_env()
     secondary_brightness = bottom_screen_brightness()
+    power = parse_power()
     return {
-        "power": parse_power(),
+        "power": power,
         "powerDefaults": factory_power_defaults(),
         "tweaks": load_tweaks(),
         "installedGames": installed_games() if include_games else [],
         "fexProfiles": fex_profile_labels(fex_contract),
+        "envPresets": load_env_presets(),
         "perf": perf_info(),
         "cpuDeviceClass": env.get("ARMADA_SOC_CLASS", ""),
         "rgbSupported": rgb_supported(),
@@ -48,6 +50,7 @@ def build_config(include_games=True):
         "bottomScreenBrightnessSupported": secondary_brightness is not None,
         "bottomScreenActive": bottom_screen_active(),
         "bottomScreenBrightness": secondary_brightness or 0,
+        "chargingFanPwm": int(power["fan"].get("charging_pwm", 0)),
         "sshEnabled": ssh_enabled(),
         "mtpEnabled": mtp_enabled(),
         "desktopMode": desktop_mode(),
